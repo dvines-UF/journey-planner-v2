@@ -1,6 +1,7 @@
 import { greeting } from './ui/greeting.js';
 import { createCityPicker } from './ui/cityPicker.js';
 import { eventBus } from './core/eventBus.js';
+import { state } from './core/state.js';
 
 const app = document.querySelector('#app');
 app.innerHTML = greeting();
@@ -10,6 +11,7 @@ app.appendChild(cityPicker);
 
 eventBus.on('citySelected', (city) => {
   console.log('City selected via eventBus:', city);
+  state.setAnchorCity(city);
   // Optional: add a simple UI feedback directly in main.js to verify it's working visually
   let display = document.getElementById('city-display');
   if (!display) {

@@ -1,4 +1,5 @@
 import { eventBus } from '../core/eventBus.js';
+import { state } from '../core/state.js';
 
 export function createCityPicker() {
   const container = document.createElement('div');
@@ -32,24 +33,47 @@ export function createCityPicker() {
 
   const performSearch = async (query) => {
     status.textContent = '📍';
-    const apiKey = import.meta.env.VITE_GEOCODE_API_KEY;
 
     let result = null;
+    let fetchUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+
+    const anchor = state.getAnchorCity();
+    if (anchor && anchor.lat && anchor.lon) {
+      // Proximity biasing using a viewbox around the anchor city.
+      // Roughly +/- 5 degrees of latitude and longitude (approx 500km).
+      const lat = parseFloat(anchor.lat);
+      const lon = parseFloat(anchor.lon);
+      fetchUrl += `&viewbox=${lon - 5},${lat + 5},${lon + 5},${lat - 5}&bounded=0`;
+    }
 
     try {
       const controller = new AbortController();
-      // Short timeout to fallback quickly on offline or slow connections
       const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-      const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=1&appid=${apiKey}`, {
-        signal: controller.signal
-      });
+      const response = await fetch(fetchUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
         if (data && data.length > 0) {
-          result = { name: data[0].name, lat: data[0].lat, lon: data[0].lon };
+          result = { name: data[0].display_name, lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+        } else {
+          // Fuzzy matching: if exact query fails, try to fetch matching results and pick the first one
+          // that starts with the query, or just the first result if fuzzy search works.
+          // Note: Nominatim already does some fuzzy matching, but we can retry without the viewbox just in case.
+          if (anchor && anchor.lat && anchor.lon) {
+            const fallbackUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+            const fbController = new AbortController();
+            const fbTimeoutId = setTimeout(() => fbController.abort(), 2500);
+            const fbResponse = await fetch(fallbackUrl, { signal: fbController.signal });
+            clearTimeout(fbTimeoutId);
+            if (fbResponse.ok) {
+              const fbData = await fbResponse.json();
+              if (fbData && fbData.length > 0) {
+                 result = { name: fbData[0].display_name, lat: parseFloat(fbData[0].lat), lon: parseFloat(fbData[0].lon) };
+              }
+            }
+          }
         }
       }
     } catch (e) {
@@ -60,13 +84,16 @@ export function createCityPicker() {
       const normalizedQuery = query.toLowerCase().trim();
       if (fallbackHubs[normalizedQuery]) {
         result = fallbackHubs[normalizedQuery];
-      } else {
-        result = { name: query, lat: 0, lon: 0, isFallback: true };
       }
     }
 
-    status.textContent = '✅';
-    eventBus.emit('citySelected', result);
+    if (result) {
+      status.textContent = '✅';
+      eventBus.emit('citySelected', result);
+    } else {
+      status.textContent = '❌';
+      console.warn('Could not find city.');
+    }
   };
 
   input.addEventListener('keydown', (e) => {
