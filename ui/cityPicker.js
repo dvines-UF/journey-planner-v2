@@ -1,5 +1,4 @@
 import { eventBus } from '../core/eventBus.js';
-import { state } from '../core/state.js';
 
 export function createCityPicker() {
   const container = document.createElement('div');
@@ -35,55 +34,21 @@ export function createCityPicker() {
     status.textContent = '📍';
 
     let result = null;
-    let fetchUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
-
-    const anchor = state.getAnchorCity();
-    if (anchor && anchor.lat && anchor.lon) {
-      // Proximity biasing using a viewbox around the anchor city.
-      // Roughly +/- 5 degrees of latitude and longitude (approx 500km).
-      const lat = parseFloat(anchor.lat);
-      const lon = parseFloat(anchor.lon);
-      fetchUrl += `&viewbox=${lon - 5},${lat + 5},${lon + 5},${lat - 5}&bounded=0`;
-    }
+    let fetchUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&format=json`;
 
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2500);
 
       const response = await fetch(fetchUrl, {
-        signal: controller.signal,
-        headers: {
-          'User-Agent': 'JourneyPlanner-v2/1.0 (contact@example.com)'
-        }
+        signal: controller.signal
       });
       clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
-        if (data && data.length > 0) {
-          result = { name: data[0].display_name, lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
-        } else {
-          // Fuzzy matching: if exact query fails, try to fetch matching results and pick the first one
-          // that starts with the query, or just the first result if fuzzy search works.
-          // Note: Nominatim already does some fuzzy matching, but we can retry without the viewbox just in case.
-          if (anchor && anchor.lat && anchor.lon) {
-            const fallbackUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
-            const fbController = new AbortController();
-            const fbTimeoutId = setTimeout(() => fbController.abort(), 2500);
-            const fbResponse = await fetch(fallbackUrl, {
-              signal: fbController.signal,
-              headers: {
-                'User-Agent': 'JourneyPlanner-v2/1.0 (contact@example.com)'
-              }
-            });
-            clearTimeout(fbTimeoutId);
-            if (fbResponse.ok) {
-              const fbData = await fbResponse.json();
-              if (fbData && fbData.length > 0) {
-                 result = { name: fbData[0].display_name, lat: parseFloat(fbData[0].lat), lon: parseFloat(fbData[0].lon) };
-              }
-            }
-          }
+        if (data.results && data.results.length > 0) {
+          result = { name: data.results[0].name, lat: parseFloat(data.results[0].latitude), lon: parseFloat(data.results[0].longitude) };
         }
       }
     } catch (e) {
@@ -99,9 +64,9 @@ export function createCityPicker() {
 
     if (result) {
       status.textContent = '✅';
-      eventBus.emit('citySelected', result);
+      eventBus.emit('CITY_UPDATED', result);
     } else {
-      status.textContent = '❌';
+      status.textContent = '';
       console.warn('Could not find city.');
     }
   };

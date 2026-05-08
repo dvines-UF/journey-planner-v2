@@ -10,12 +10,9 @@ app.innerHTML = greeting();
 const cityPicker = createCityPicker();
 app.appendChild(cityPicker);
 
-eventBus.on('citySelected', (city) => {
-  console.log('City selected via eventBus:', city);
+eventBus.on('CITY_UPDATED', (city) => {
+  console.log('City updated via eventBus:', city);
   state.setAnchorCity(city);
-
-  // Broadcast CITY_UPDATED to listeners like the maps engine
-  eventBus.emit('CITY_UPDATED', city);
 
   // Optional: add a simple UI feedback directly in main.js to verify it's working visually
   let display = document.getElementById('city-display');
