@@ -50,7 +50,12 @@ export function createCityPicker() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-      const response = await fetch(fetchUrl, { signal: controller.signal });
+      const response = await fetch(fetchUrl, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'JourneyPlanner-v2/1.0 (contact@example.com)'
+        }
+      });
       clearTimeout(timeoutId);
 
       if (response.ok) {
@@ -65,7 +70,12 @@ export function createCityPicker() {
             const fallbackUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
             const fbController = new AbortController();
             const fbTimeoutId = setTimeout(() => fbController.abort(), 2500);
-            const fbResponse = await fetch(fallbackUrl, { signal: fbController.signal });
+            const fbResponse = await fetch(fallbackUrl, {
+              signal: fbController.signal,
+              headers: {
+                'User-Agent': 'JourneyPlanner-v2/1.0 (contact@example.com)'
+              }
+            });
             clearTimeout(fbTimeoutId);
             if (fbResponse.ok) {
               const fbData = await fbResponse.json();
