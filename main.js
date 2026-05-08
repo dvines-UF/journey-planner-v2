@@ -1,5 +1,6 @@
 import { greeting } from './ui/greeting.js';
 import { createCityPicker } from './ui/cityPicker.js';
+import { createDailyCard } from './ui/dailyCard.js';
 import { eventBus } from './core/eventBus.js';
 import { state } from './core/state.js';
 import { initializeMap } from './services/maps.js';
@@ -9,6 +10,9 @@ app.innerHTML = greeting();
 
 const cityPicker = createCityPicker();
 app.appendChild(cityPicker);
+
+const dailyCard = createDailyCard();
+app.appendChild(dailyCard);
 
 eventBus.on('CITY_UPDATED', (city) => {
   console.log('City updated via eventBus:', city);
