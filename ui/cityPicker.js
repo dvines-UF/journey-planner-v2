@@ -23,13 +23,6 @@ export function createCityPicker() {
   input.addEventListener('click', preventBubble);
   input.addEventListener('focus', preventBubble);
 
-  const fallbackHubs = {
-    'london': { name: 'London', lat: 51.5074, lon: -0.1278 },
-    'new york': { name: 'New York', lat: 40.7128, lon: -74.0060 },
-    'tokyo': { name: 'Tokyo', lat: 35.6762, lon: 139.6503 },
-    'sydney': { name: 'Sydney', lat: -33.8688, lon: 151.2093 }
-  };
-
   const performSearch = async (query) => {
     status.textContent = '📍';
 
@@ -48,25 +41,26 @@ export function createCityPicker() {
       if (response.ok) {
         const data = await response.json();
         if (data.results && data.results.length > 0) {
-          result = { name: data.results[0].name, lat: parseFloat(data.results[0].latitude), lon: parseFloat(data.results[0].longitude) };
+          const name = data.results[0].name;
+          const country = data.results[0].country || '';
+          const fullName = country ? `${name}, ${country}` : name;
+
+          result = {
+            name: fullName,
+            lat: parseFloat(data.results[0].latitude),
+            lon: parseFloat(data.results[0].longitude)
+          };
         }
       }
     } catch (e) {
-      console.warn('Geocoding search failed or timed out, using fallback hubs.', e);
-    }
-
-    if (!result) {
-      const normalizedQuery = query.toLowerCase().trim();
-      if (fallbackHubs[normalizedQuery]) {
-        result = fallbackHubs[normalizedQuery];
-      }
+      console.warn('Geocoding search failed or timed out.', e);
     }
 
     if (result) {
       status.textContent = '✅';
       eventBus.emit('CITY_UPDATED', result);
     } else {
-      status.textContent = '';
+      status.textContent = '📍';
       console.warn('Could not find city.');
     }
   };
