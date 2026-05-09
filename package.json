@@ -21,10 +21,10 @@
   },
   "homepage": "https://github.com/dvines-UF/journey-planner-v2#readme",
   "devDependencies": {
+    "playwright": "^1.59.1",
     "vite": "^8.0.11"
   },
   "dependencies": {
-    "leaflet": "^1.9.4",
-    "playwright": "^1.59.1"
+    "leaflet": "^1.9.4"
   }
 }

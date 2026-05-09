@@ -81,37 +81,6 @@
   }
 }
 
-.city-result-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.city-result-name {
-  font-family: system-ui, -apple-system, sans-serif;
-  color: #2d3748;
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 0.25rem;
-}
-
-.city-result-admin {
-  font-family: system-ui, -apple-system, sans-serif;
-  color: #718096;
-  font-size: 0.875rem;
-}
-
-.city-result-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #718096;
-  font-size: 0.875rem;
-}
-
-.city-result-icon {
-  font-size: 1.25rem;
-}
-
 .city-picker-empty {
   padding: 2rem 1rem;
   text-align: center;

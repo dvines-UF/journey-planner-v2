@@ -12,7 +12,6 @@ export function createCityPicker() {
   launchBtn.textContent = 'Search Destinations...';
   container.appendChild(launchBtn);
 
-  // Create Full-screen Overlay
   const overlay = document.createElement('div');
   overlay.className = 'city-picker-overlay';
 
@@ -22,7 +21,6 @@ export function createCityPicker() {
   const closeBtn = document.createElement('button');
   closeBtn.className = 'city-picker-close-btn';
   closeBtn.textContent = '✕';
-  closeBtn.setAttribute('aria-label', 'Close search');
 
   const inputWrapper = document.createElement('div');
   inputWrapper.className = 'city-input-wrapper';
@@ -47,34 +45,27 @@ export function createCityPicker() {
   // Overlay Mechanics
   const openOverlay = () => {
     input.value = '';
-    resultsList.innerHTML = ''; // reset results
+    resultsList.innerHTML = '';
     overlay.classList.add('open');
-    setTimeout(() => input.focus(), 300); // Wait for transition
+    setTimeout(() => input.focus(), 300);
   };
 
   const closeOverlay = () => {
     overlay.classList.remove('open');
-    if (document.activeElement) {
-      document.activeElement.blur(); // Dismiss software keyboard
-    }
+    if (document.activeElement) document.activeElement.blur();
   };
 
   launchBtn.addEventListener('click', openOverlay);
   closeBtn.addEventListener('click', closeOverlay);
 
-  // Prevent keyboard dismiss issues on mobile
-  const preventBubble = (e) => {
-    e.stopPropagation();
-  };
-  input.addEventListener('touchstart', preventBubble, { passive: false });
+  // MOBILE PROTECTION: Prevent keyboard dismiss
+  const preventBubble = (e) => e.stopPropagation();
+  input.addEventListener('touchstart', preventBubble);
   input.addEventListener('mousedown', preventBubble);
   input.addEventListener('click', preventBubble);
 
-  // Debounce and Search Logic
-  let debounceTimeout = null;
-
-  const renderResults = (results, anchorCoords) => {
-    resultsList.innerHTML = ''; // Clear previous
+  const renderResults = (results) => {
+    resultsList.innerHTML = '';
 
     if (results.length === 0) {
       const emptyState = document.createElement('li');
@@ -84,74 +75,57 @@ export function createCityPicker() {
       return;
     }
 
-    results.forEach(city => {
+    // THE VENICE FIX: Sort by population so Italy wins over Ohio
+    const sortedResults = [...results].sort((a, b) => (b.population || 0) - (a.population || 0));
+
+    sortedResults.forEach(city => {
       const li = document.createElement('li');
       li.className = 'city-result-item';
 
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'city-result-info';
+      // SPACE EFFICIENT UI: Single line layout
+      const content = document.createElement('div');
+      content.className = 'city-result-content';
+      content.style.display = 'flex';
+      content.style.justifyContent = 'space-between';
+      content.style.alignItems = 'center';
+      content.style.width = '100%';
+
+      const textWrapper = document.createElement('div');
+      textWrapper.style.overflow = 'hidden';
+      textWrapper.style.textOverflow = 'ellipsis';
+      textWrapper.style.whiteSpace = 'nowrap';
 
       const nameSpan = document.createElement('span');
-      nameSpan.className = 'city-result-name';
+      nameSpan.style.fontWeight = 'bold';
       nameSpan.textContent = city.name;
 
       const adminSpan = document.createElement('span');
-      adminSpan.className = 'city-result-admin';
+      adminSpan.style.fontSize = '0.85em';
+      adminSpan.style.color = '#666';
+      adminSpan.style.marginLeft = '8px';
       const adminParts = [city.admin1, city.country].filter(Boolean).join(', ');
       adminSpan.textContent = adminParts;
 
-      infoDiv.appendChild(nameSpan);
-      infoDiv.appendChild(adminSpan);
-      li.appendChild(infoDiv);
+      textWrapper.appendChild(nameSpan);
+      textWrapper.appendChild(adminSpan);
+      content.appendChild(textWrapper);
 
-      const metaDiv = document.createElement('div');
-      metaDiv.className = 'city-result-meta';
+      // Icon Logic (✈️ for big hubs, 🚆 for regional)
+      const iconSpan = document.createElement('span');
+      iconSpan.textContent = (city.population > 500000) ? '✈️' : '🚆';
+      content.appendChild(iconSpan);
 
-      let distanceText = '';
-      let iconText = '';
+      li.appendChild(content);
 
-      if (city.calculatedDistance !== null && city.calculatedDistance !== undefined) {
-        distanceText = `${Math.round(city.calculatedDistance).toLocaleString()}km away`;
-        if (city.calculatedDistance > 500 || (city.population && city.population > 1000000)) {
-          iconText = '✈️';
-        } else {
-          iconText = '🚆';
-        }
-      } else if (city.population && city.population > 1000000) {
-        iconText = '✈️';
-      }
-
-      if (distanceText) {
-        const distSpan = document.createElement('span');
-        distSpan.textContent = distanceText;
-        metaDiv.appendChild(distSpan);
-      }
-
-      if (iconText) {
-        const iconSpan = document.createElement('span');
-        iconSpan.className = 'city-result-icon';
-        iconSpan.textContent = iconText;
-        metaDiv.appendChild(iconSpan);
-      }
-
-      li.appendChild(metaDiv);
-
-      li.addEventListener('click', () => {
+      li.addEventListener('click', (e) => {
+        e.stopPropagation();
         const selectedCity = {
-          name: city.country ? `${city.name}, ${city.country}` : city.name,
+          name: city.name,
+          country: city.country,
           lat: city.latitude,
-          lon: city.longitude,
-          fullData: city // Pass full object if needed
+          lon: city.longitude
         };
-
-        // Save as last_home_base if it's Day 1 (no anchor in state implies Day 1 in this isolated test context, though we will explicitly save it)
-        try {
-            localStorage.setItem('last_home_base', JSON.stringify({ lat: city.latitude, lon: city.longitude }));
-        } catch(e) { console.warn("Failed to save to localStorage", e); }
-
-        eventBus.emit('CITY_SELECTED', selectedCity);
-        eventBus.emit('CITY_UPDATED', selectedCity); // Maintain backwards compatibility for main.js and maps
-
+        eventBus.emit('CITY_UPDATED', selectedCity);
         closeOverlay();
       });
 
@@ -159,39 +133,18 @@ export function createCityPicker() {
     });
   };
 
-  const handleInput = () => {
+  let debounceTimeout = null;
+  input.addEventListener('input', () => {
     clearTimeout(debounceTimeout);
     const query = input.value.trim();
-
-    if (!query) {
-      resultsList.innerHTML = '';
-      return;
-    }
+    if (!query) { resultsList.innerHTML = ''; return; }
 
     debounceTimeout = setTimeout(async () => {
-      // Determine anchor coords
-      let anchorCoords = null;
-      const currentAnchorCity = state.getAnchorCity();
-
-      if (currentAnchorCity) {
-          // Day N > 1
-          anchorCoords = { lat: currentAnchorCity.lat, lon: currentAnchorCity.lon };
-      } else {
-          // Day 1: Try to load from localStorage
-          try {
-              const savedBase = localStorage.getItem('last_home_base');
-              if (savedBase) {
-                  anchorCoords = JSON.parse(savedBase);
-              }
-          } catch(e) { console.warn("Failed to read localStorage", e); }
-      }
-
-      const results = await searchCities(query, anchorCoords);
-      renderResults(results, anchorCoords);
+      // Fetch more results so our population sort has a better pool
+      const results = await searchCities(query);
+      renderResults(results);
     }, 400);
-  };
-
-  input.addEventListener('input', handleInput);
+  });
 
   return container;
 }
