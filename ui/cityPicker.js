@@ -60,7 +60,7 @@ export function createCityPicker() {
 
   // MOBILE PROTECTION: Prevent keyboard dismiss
   const preventBubble = (e) => e.stopPropagation();
-  input.addEventListener('touchstart', preventBubble);
+  input.addEventListener('touchstart', preventBubble, { passive: false });
   input.addEventListener('mousedown', preventBubble);
   input.addEventListener('click', preventBubble);
 
@@ -75,10 +75,7 @@ export function createCityPicker() {
       return;
     }
 
-    // THE VENICE FIX: Sort by population so Italy wins over Ohio
-    const sortedResults = [...results].sort((a, b) => (b.population || 0) - (a.population || 0));
-
-    sortedResults.forEach(city => {
+    results.forEach(city => {
       const li = document.createElement('li');
       li.className = 'city-result-item';
 
@@ -94,17 +91,23 @@ export function createCityPicker() {
       textWrapper.style.overflow = 'hidden';
       textWrapper.style.textOverflow = 'ellipsis';
       textWrapper.style.whiteSpace = 'nowrap';
+      textWrapper.style.flexGrow = '1';
+      textWrapper.style.marginRight = '8px';
 
       const nameSpan = document.createElement('span');
       nameSpan.style.fontWeight = 'bold';
+      nameSpan.style.color = '#2d3748';
       nameSpan.textContent = city.name;
 
       const adminSpan = document.createElement('span');
       adminSpan.style.fontSize = '0.85em';
-      adminSpan.style.color = '#666';
-      adminSpan.style.marginLeft = '8px';
+      adminSpan.style.color = '#718096';
+
       const adminParts = [city.admin1, city.country].filter(Boolean).join(', ');
-      adminSpan.textContent = adminParts;
+      // The instructions specified "City, Region" so we prepend the comma if admin parts exist.
+      if (adminParts) {
+         adminSpan.textContent = `, ${adminParts}`;
+      }
 
       textWrapper.appendChild(nameSpan);
       textWrapper.appendChild(adminSpan);
@@ -112,6 +115,7 @@ export function createCityPicker() {
 
       // Icon Logic (✈️ for big hubs, 🚆 for regional)
       const iconSpan = document.createElement('span');
+      iconSpan.style.flexShrink = '0';
       iconSpan.textContent = (city.population > 500000) ? '✈️' : '🚆';
       content.appendChild(iconSpan);
 
@@ -120,10 +124,10 @@ export function createCityPicker() {
       li.addEventListener('click', (e) => {
         e.stopPropagation();
         const selectedCity = {
-          name: city.name,
-          country: city.country,
+          name: city.country ? `${city.name}, ${city.country}` : city.name,
           lat: city.latitude,
-          lon: city.longitude
+          lon: city.longitude,
+          fullData: city
         };
         eventBus.emit('CITY_UPDATED', selectedCity);
         closeOverlay();
@@ -140,10 +144,21 @@ export function createCityPicker() {
     if (!query) { resultsList.innerHTML = ''; return; }
 
     debounceTimeout = setTimeout(async () => {
-      // Fetch more results so our population sort has a better pool
       const results = await searchCities(query);
       renderResults(results);
     }, 400);
+  });
+
+  // Retain 'Enter to Search' functionality fallback
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      clearTimeout(debounceTimeout);
+      const query = input.value.trim();
+      if (query) {
+        searchCities(query).then(renderResults);
+      }
+    }
   });
 
   return container;

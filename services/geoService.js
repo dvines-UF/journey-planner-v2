@@ -18,7 +18,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 export async function searchCities(query, anchorCoords = null) {
   if (!query) return [];
 
-  let fetchUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=10&format=json`;
+  let fetchUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&format=json`;
 
   try {
     const controller = new AbortController();
@@ -57,8 +57,8 @@ export async function searchCities(query, anchorCoords = null) {
       };
     });
 
-    // Sort descending by score
-    processedResults.sort((a, b) => b.score - a.score);
+    // Sort descending by population as per "The Venice Fix" strict rules
+    processedResults.sort((a, b) => (b.population || 0) - (a.population || 0));
 
     return processedResults;
 
