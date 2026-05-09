@@ -14,9 +14,13 @@ app.appendChild(cityPicker);
 const dailyCard = createDailyCard();
 app.appendChild(dailyCard);
 
+eventBus.on('CITY_SELECTED', (city) => {
+  console.log('City selected via eventBus:', city);
+  state.setAnchorCity(city);
+});
+
 eventBus.on('CITY_UPDATED', (city) => {
   console.log('City updated via eventBus:', city);
-  state.setAnchorCity(city);
 
   // Optional: add a simple UI feedback directly in main.js to verify it's working visually
   let display = document.getElementById('city-display');
