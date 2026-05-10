@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/dvines-UF/journey-planner-v2#readme",
   "devDependencies": {
-    "playwright": "^1.59.1",
     "vite": "^8.0.11"
   }
 }
