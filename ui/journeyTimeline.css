@@ -1,0 +1,99 @@
+.journey-timeline-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+  padding: 10px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.journey-timeline-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  padding-bottom: 5px; /* for scrollbar */
+  scrollbar-width: thin;
+}
+
+.journey-timeline-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.journey-timeline-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+.day-card {
+  flex: 0 0 auto;
+  width: 120px;
+  background: #f8f9fa;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.day-card:hover {
+  background: #edf2f7;
+}
+
+.day-card.active {
+  border-color: #3182ce;
+  background: #ebf8ff;
+}
+
+.day-number {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #718096;
+  margin-bottom: 4px;
+}
+
+.day-card.active .day-number {
+  color: #2b6cb0;
+}
+
+.city-name {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.95em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.add-day-btn {
+  flex: 0 0 auto;
+  padding: 0 16px;
+  background: transparent;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  color: #4a5568;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-day-btn:hover {
+  background: #f7fafc;
+  border-color: #a0aec0;
+  color: #2d3748;
+}
