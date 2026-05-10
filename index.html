@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Journey Planner v2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Antigravity Journey v2</title>
     <style>
-      body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-      #map { position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh; z-index: 0; }
-      #app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
-      #app > * { pointer-events: auto; }
+        :root { --accent: #007AFF; --bg: #1c1c1e; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        #map { position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh; z-index: 1; filter: grayscale(20%); }
+        #app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+        #app > * { pointer-events: auto; }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div id="map"></div>
     <div id="app"></div>
     <script type="module" src="/main.js"></script>
-  </body>
+</body>
 </html>

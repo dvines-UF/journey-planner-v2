@@ -1,25 +1,27 @@
 .journey-timeline-container {
   position: fixed;
-  bottom: 20px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  max-width: 600px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  width: 92%;
+  max-width: 800px;
+  background: rgba(28, 28, 30, 0.65);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
   z-index: 1000;
-  padding: 10px;
-  font-family: system-ui, -apple-system, sans-serif;
+  padding: 16px;
 }
 
 .journey-timeline-scroll {
   display: flex;
   overflow-x: auto;
-  gap: 12px;
-  padding-bottom: 5px; /* for scrollbar */
+  gap: 16px;
+  padding-bottom: 8px; /* for scrollbar */
   scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.3) transparent;
 }
 
 .journey-timeline-scroll::-webkit-scrollbar {
@@ -27,19 +29,19 @@
 }
 
 .journey-timeline-scroll::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
+  background: rgba(255,255,255,0.3);
   border-radius: 3px;
 }
 
 .day-card {
   flex: 0 0 auto;
-  width: 120px;
-  background: #f8f9fa;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  padding: 12px;
+  width: 140px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -48,29 +50,34 @@
 }
 
 .day-card:hover {
-  background: #edf2f7;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .day-card.active {
-  border-color: #3182ce;
-  background: #ebf8ff;
+  background: rgba(0, 122, 255, 0.15);
+  border-color: rgba(0, 122, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 122, 255, 0.3);
 }
 
 .day-number {
-  font-size: 0.85em;
-  font-weight: 600;
-  color: #718096;
-  margin-bottom: 4px;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
 }
 
 .day-card.active .day-number {
-  color: #2b6cb0;
+  color: #007AFF;
 }
 
 .city-name {
-  font-weight: 600;
-  color: #2d3748;
-  font-size: 0.95em;
+  font-weight: 500;
+  color: #ffffff;
+  font-size: 1em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -79,21 +86,27 @@
 
 .add-day-btn {
   flex: 0 0 auto;
-  padding: 0 16px;
+  padding: 0 20px;
   background: transparent;
-  border: 2px dashed #cbd5e0;
-  border-radius: 8px;
-  color: #4a5568;
-  font-weight: 600;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+}
+
+.add-day-btn span {
+  font-size: 1.2em;
+  font-weight: 300;
 }
 
 .add-day-btn:hover {
-  background: #f7fafc;
-  border-color: #a0aec0;
-  color: #2d3748;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
 }

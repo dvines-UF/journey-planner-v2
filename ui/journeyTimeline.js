@@ -9,9 +9,6 @@ export function createJourneyTimeline() {
   const scrollArea = document.createElement('div');
   scrollArea.className = 'journey-timeline-scroll';
 
-  // VALIDATION: We will re-render exactly what is needed without duplicating listeners.
-  // Using an inner helper for creating elements rather than tearing down DOM.
-  // Wait, tearing down innerHTML = '' is safe from listener duplication if listeners are attached to the elements we discard.
   const renderTimeline = () => {
     scrollArea.innerHTML = '';
     const journey = state.getJourney();
@@ -47,7 +44,7 @@ export function createJourneyTimeline() {
 
     const addBtn = document.createElement('button');
     addBtn.className = 'add-day-btn';
-    addBtn.textContent = '+ Add Next Day';
+    addBtn.innerHTML = '<span>+</span> Add Day';
     addBtn.addEventListener('click', () => {
       const newDay = state.addDay();
       state.setActiveDay(newDay.id);
@@ -59,13 +56,9 @@ export function createJourneyTimeline() {
     scrollArea.appendChild(addBtn);
   };
 
-  // We are subscribing to eventBus here.
-  // It's important we don't call createJourneyTimeline multiple times, but if we do,
-  // we would have multiple listeners. In main.js, we only call it once.
   eventBus.on('JOURNEY_UPDATED', renderTimeline);
   eventBus.on('ACTIVE_DAY_CHANGED', renderTimeline);
 
-  // Initial render
   renderTimeline();
 
   const initialJourney = state.getJourney();
